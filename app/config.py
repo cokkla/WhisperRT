@@ -3,9 +3,9 @@
 """
 
 # 音频配置
-SAMPLE_RATE = 16000
-BLOCK_SIZE = 2000  # 从4000减少到2000，减少音频块延迟
-BUFFER_SECONDS = 3  # 从5秒减少到3秒，这是最大的延迟优化
+SAMPLE_RATE = 16000 # 采样率 16000Hz
+BLOCK_SIZE = 2000  # 块大小 从4000减少到2000，减少音频块延迟
+BUFFER_SECONDS = 3  # 缓冲区大小 从5秒减少到3秒，这是最大的延迟优化
 
 # 模型配置
 AVAILABLE_MODELS = {
@@ -15,7 +15,23 @@ AVAILABLE_MODELS = {
     "large-v3-turbo": "大型模型，精度高，接近tiny的速度"
 }
 DEFAULT_MODEL = "large-v3-turbo"
-DEFAULT_LANGUAGE = "zh"
+DEFAULT_LANGUAGE = None # 不设置语言，自动选择
+
+# 全局设置配置
+GLOBAL_SETTINGS = {
+    "show_timestamp": False,  # 默认不显示时间戳
+    "language": DEFAULT_LANGUAGE,  # 全局语言设置
+    "model": DEFAULT_MODEL,  # 全局模型设置
+}
+
+
+# 文件转录配置
+FILE_TRANSCRIPTION_CONFIG = {
+    "max_file_size": 100 * 1024 * 1024,  # 100MB
+    "allowed_formats": [".wav", ".mp3", ".m4a", ".flac", ".ogg"],
+    "temp_dir": "temp_audio",
+    "output_format": "text",  # 可选: "text", "json"
+}
 
 # 反幻觉配置 - 速度优化
 ANTI_HALLUCINATION_CONFIG = {

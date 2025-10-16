@@ -12,6 +12,8 @@ dependencies = [
     "sounddevice>=0.5.1",
     "uvicorn[standard]>=0.34.2",
     "websockets>=15.0.1",
+    "python-multipart>=0.0.6",
+    "pydub>=0.25.1",
 ]
 
 [build-system]

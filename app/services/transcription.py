@@ -10,7 +10,7 @@ import re
 from app.core.logging import logger
 from app.config import (
     SAMPLE_RATE, BLOCK_SIZE, BUFFER_SECONDS, DEFAULT_LANGUAGE,
-    ANTI_HALLUCINATION_CONFIG, HALLUCINATION_PATTERNS
+    ANTI_HALLUCINATION_CONFIG, HALLUCINATION_PATTERNS, GLOBAL_SETTINGS
 )
 from app.services.whisper import whisper_service
 from app.services.audio import audio_service
@@ -25,7 +25,7 @@ class TranscriptionService:
         self.transcript = []
         self.last_time = time.time()
         self.running = False
-        self.current_language = DEFAULT_LANGUAGE
+        self.current_language = GLOBAL_SETTINGS["language"]  # 使用全局语言设置
         self.connected_websockets = set()
         self.start_time = None  # 新增：记录录音开始时间
         self.display_mode = "segments"  # 显示模式
@@ -253,7 +253,7 @@ class TranscriptionService:
                                             asyncio.run(self.broadcast_to_websockets('transcription', {
                                                 'text': text,
                                                 'timestamp': timestamp,
-                                                'show_timestamp': True,
+                                                'show_timestamp': GLOBAL_SETTINGS["show_timestamp"],
                                                 'confidence': confidence,
                                                 'mode': 'segments'
                                             }))
@@ -363,6 +363,7 @@ class TranscriptionService:
             dict: 操作状态和消息
         """
         self.current_language = language
+        GLOBAL_SETTINGS["language"] = language  # 更新全局设置
         return {"status": "success", "message": f"已切换到语言: {language}"}
 
     def set_display_mode(self, mode):
@@ -380,6 +381,19 @@ class TranscriptionService:
         
         self.display_mode = mode
         return {"status": "success", "message": f"已切换到{self.display_mode}模式"}
+    
+    def set_timestamp_display(self, show_timestamp):
+        """
+        设置时间戳显示
+        
+        Args:
+            show_timestamp: 是否显示时间戳
+            
+        Returns:
+            dict: 操作状态和消息
+        """
+        GLOBAL_SETTINGS["show_timestamp"] = show_timestamp
+        return {"status": "success", "message": f"时间戳显示已设置为: {show_timestamp}"}
 
 # 创建全局转写服务实例
 transcription_service = TranscriptionService()

@@ -1,6 +1,8 @@
 """
 应用入口模块
 """
+import os
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -9,6 +11,9 @@ from fastapi.templating import Jinja2Templates
 from app.api.router import api_router
 from app.core.logging import logger
 from app.config import HOST, PORT
+
+# 切换到项目根目录，确保静态文件路径正确
+os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
 # 创建FastAPI应用
 app = FastAPI(title="实时语音转写")

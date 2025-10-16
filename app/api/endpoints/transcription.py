@@ -4,10 +4,10 @@
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from app.models.schemas import ModelRequest, LanguageRequest, TimestampRequest
+from app.models.schemas import ModelRequest, LanguageRequest, TimestampRequest, GlobalSettingsRequest, GlobalSettingsResponse
 from app.services.transcription import transcription_service
 from app.services.whisper import whisper_service
-from app.config import AVAILABLE_MODELS, ANTI_HALLUCINATION_CONFIG, HALLUCINATION_PATTERNS
+from app.config import AVAILABLE_MODELS, ANTI_HALLUCINATION_CONFIG, HALLUCINATION_PATTERNS, GLOBAL_SETTINGS
 
 router = APIRouter()
 
@@ -48,6 +48,7 @@ def change_model(request: ModelRequest):
     
     try:
         whisper_service.load_model(model_name)
+        GLOBAL_SETTINGS["model"] = model_name  # 更新全局设置
         return {"status": "success", "message": f"已切换到模型: {model_name}"}
     except Exception as e:
         return {"status": "error", "message": f"切换模型失败: {str(e)}"}
@@ -244,7 +245,7 @@ def set_timestamp_display(request: TimestampRequest):
     Returns:
         操作状态和消息
     """
-    return {"status": "success", "message": f"时间戳显示已设置为: {request.show_timestamp}"}
+    return transcription_service.set_timestamp_display(request.show_timestamp)
 
 @router.post('/change_display_mode')
 def change_display_mode(request: dict):
@@ -259,3 +260,84 @@ def change_display_mode(request: dict):
     """
     mode = request.get('mode')
     return transcription_service.set_display_mode(mode)
+
+@router.get('/global_settings', response_model=GlobalSettingsResponse)
+def get_global_settings():
+    """
+    获取全局设置
+    
+    Returns:
+        GlobalSettingsResponse: 当前全局设置
+    """
+    return GlobalSettingsResponse(
+        status="success",
+        message="获取全局设置成功",
+        settings=GLOBAL_SETTINGS.copy()
+    )
+
+@router.post('/update_global_settings', response_model=GlobalSettingsResponse)
+def update_global_settings(request: GlobalSettingsRequest):
+    """
+    更新全局设置
+    
+    Args:
+        request: 包含要更新的设置参数的请求对象
+    
+    Returns:
+        GlobalSettingsResponse: 更新结果
+    """
+    try:
+        updated_params = []
+        
+        # 更新时间戳显示
+        if request.show_timestamp is not None:
+            GLOBAL_SETTINGS["show_timestamp"] = request.show_timestamp
+            updated_params.append(f"show_timestamp={request.show_timestamp}")
+        
+        
+        # 更新语言设置
+        if request.language is not None:
+            GLOBAL_SETTINGS["language"] = request.language
+            transcription_service.current_language = request.language  # 同步更新转录服务
+            updated_params.append(f"language={request.language}")
+        
+        # 更新模型设置
+        if request.model is not None:
+            if request.model not in AVAILABLE_MODELS:
+                return GlobalSettingsResponse(
+                    status="error",
+                    message=f"不支持的模型: {request.model}"
+                )
+            
+            if transcription_service.running:
+                return GlobalSettingsResponse(
+                    status="error",
+                    message="请先停止转写再切换模型"
+                )
+            
+            try:
+                whisper_service.load_model(request.model)
+                GLOBAL_SETTINGS["model"] = request.model
+                updated_params.append(f"model={request.model}")
+            except Exception as e:
+                return GlobalSettingsResponse(
+                    status="error",
+                    message=f"切换模型失败: {str(e)}"
+                )
+        
+        if updated_params:
+            message = f"已更新参数: {', '.join(updated_params)}"
+        else:
+            message = "没有参数被更新"
+        
+        return GlobalSettingsResponse(
+            status="success",
+            message=message,
+            settings=GLOBAL_SETTINGS.copy()
+        )
+        
+    except Exception as e:
+        return GlobalSettingsResponse(
+            status="error",
+            message=f"更新全局设置失败: {str(e)}"
+        )

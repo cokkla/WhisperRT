@@ -11,8 +11,10 @@ def setup_logging():
         logging.Logger: 配置好的日志记录器
     """
     logging.basicConfig(
-        level=logging.INFO, 
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        # level=logging.INFO, 
+        # format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=logging.DEBUG,  # 改为DEBUG级别以获取更详细的日志
+        format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
     )
     logger = logging.getLogger("whisper_live")
     return logger
