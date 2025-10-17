@@ -34,13 +34,16 @@ FILE_TRANSCRIPTION_CONFIG = {
 }
 
 # 反幻觉配置 - 速度优化
+# 初始提示词，刚开始中文提示词通用，第二天中文提示词突然会给英文音频造成幻觉，英文提示词又会影响中文音频
+# 目前直接在whisper.py中不传入初始提示词
 ANTI_HALLUCINATION_CONFIG = {
     "temperature": 0.0,  # 保持确定性
     "no_speech_threshold": 0.6,  # 保持无语音检测
-    "condition_on_previous_text": False,  # 不依赖前文，提升速度
+    "condition_on_previous_text": False,  # 是否依赖前文
     "compression_ratio_threshold": 2.4,  # 保持压缩比阈值
     "log_prob_threshold": -1.0,  # 保持对数概率阈值
     "initial_prompt": "请只转写实际听到的语音内容，忽略背景音乐和噪音。",  # 简化prompt
+    # "initial_prompt": "Please transcribe only the actual spoken content and ignore background music and noise.",
     # 音频检测阈值 - 更宽松以减少处理时间
     "energy_threshold": 0.015,  # 从0.02降低到0.015
     "confidence_threshold": 0.5,  # 从0.6降低到0.5，接受更多结果

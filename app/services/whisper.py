@@ -75,7 +75,7 @@ class WhisperService:
             'condition_on_previous_text': config["condition_on_previous_text"],
             'compression_ratio_threshold': config["compression_ratio_threshold"],
             'log_prob_threshold': config["log_prob_threshold"],
-            'initial_prompt': config["initial_prompt"],
+            # 'initial_prompt': config["initial_prompt"],
             'word_timestamps': False,   # 不生成词级时间戳，提升速度
             'vad_filter': True,         # 启用 VAD 过滤，减少无效推理
             'vad_parameters': dict(
