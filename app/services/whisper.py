@@ -66,6 +66,7 @@ class WhisperService:
             tuple: (segments, info) 转写结果和信息
         """
         # 使用速度优化的推理参数
+        logger.debug("开始音频转写...")
         config = ANTI_HALLUCINATION_CONFIG
         transcribe_kwargs = {
             'beam_size': 1, # 从默认5降到1，大幅提升速度
@@ -77,7 +78,7 @@ class WhisperService:
             'log_prob_threshold': config["log_prob_threshold"],
             # 'initial_prompt': config["initial_prompt"],
             'word_timestamps': False,   # 不生成词级时间戳，提升速度
-            'vad_filter': True,         # 启用 VAD 过滤，减少无效推理
+            'vad_filter': True,        # 禁用 VAD 过滤，避免过度过滤音频内容
             'vad_parameters': dict(
                 min_silence_duration_ms=500,    # 最小静音持续时间
                 speech_pad_ms=400               # 最小静音持续时间
@@ -85,7 +86,7 @@ class WhisperService:
         }
 
         # 只有当language不为None时才添加language参数
-        if language is not None:
+        if language is not None and language != "auto":
             transcribe_kwargs['language'] = language
 
         segments, info = self.model.transcribe(audio_samples, **transcribe_kwargs)
