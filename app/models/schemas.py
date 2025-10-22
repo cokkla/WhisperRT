@@ -61,3 +61,39 @@ class GlobalSettingsResponse(BaseModel):
     status: str
     message: str
     settings: Optional[dict] = None
+
+
+class MeetingInfo(BaseModel):
+    """会议基本信息"""
+    topic: str
+    date: str  # yyyy-mm-dd格式
+    location: str
+    attendees: List[str]
+    host: str
+    recorder: str
+
+
+class MeetingMinutesRequest(BaseModel):
+    """会议纪要生成请求"""
+    transcription_text: str
+    meeting_info: MeetingInfo
+
+
+class MeetingMinutesResponse(BaseModel):
+    """会议纪要生成响应"""
+    task_id: str
+    status: str
+    message: str
+
+
+class TaskStatusResponse(BaseModel):
+    """任务状态响应"""
+    task_id: str
+    status: str
+    created_at: str
+    result_length: int
+
+
+class TaskListResponse(BaseModel):
+    """任务列表响应"""
+    tasks: List[TaskStatusResponse]

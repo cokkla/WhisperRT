@@ -24,6 +24,15 @@ GLOBAL_SETTINGS = {
     "model": DEFAULT_MODEL,  # 全局模型设置
 }
 
+LLM_MODEL = {
+    "model_name": "qwen-plus",
+    "api_key": "sk-b2fc84acf3554474b78f1901805ea26e",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    # "model_name": "deepseek-reasoner",
+    # "api_key": "sk-eefa18bfe34a4849a7c7ddf638b472e3",
+    # "base_url": "https://api.deepseek.com/v1"
+}
+
 
 # 文件转录配置
 FILE_TRANSCRIPTION_CONFIG = {
@@ -46,7 +55,7 @@ ANTI_HALLUCINATION_CONFIG = {
     # "initial_prompt": "Please transcribe only the actual spoken content and ignore background music and noise.",
     # 音频检测阈值 - 更宽松以减少处理时间
     "energy_threshold": 0.015,  # 从0.02降低到0.015
-    "confidence_threshold": 0.5,  # 从0.6降低到0.5，接受更多结果
+    "confidence_threshold": 0.3,  # 从0.5降低到0.3，接受更多结果，减少误判
     "silence_threshold": 0.01,  # 从0.005放宽到0.01
     "zcr_threshold": 0.15,  # 从0.1放宽到0.15
 }
