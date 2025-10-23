@@ -1,7 +1,7 @@
 """
 会议纪要生成API端点
 """
-
+import asyncio
 import json
 import uuid
 import logging
@@ -101,13 +101,15 @@ async def stream_meeting_minutes(task_id: str):
             ):
                 # 发送SSE数据
                 yield f"data: {json.dumps(result, ensure_ascii=False)}\n\n"
-                
+                await asyncio.sleep(0.01)
+
                 # 如果是最终结果，保存到任务存储
                 if result.get("step") == "generating" and result.get("status") == "completed":
                     task_storage[task_id]["status"] = "completed"
                     # 保存完整的会议纪要内容
                     content = result.get("content", "")
                     task_storage[task_id]["result"] = content["会议纪要"]
+            yield "event: done\ndata: 会议纪要生成完成\n\n"
 
         except Exception as e:
             # 发送错误信息
@@ -119,14 +121,18 @@ async def stream_meeting_minutes(task_id: str):
             yield f"data: {json.dumps(error_result, ensure_ascii=False)}\n\n"
             task_storage[task_id]["status"] = "failed"
             task_storage[task_id]["error"] = str(e)
+
+        # 心跳机制 防止前端长时间未接收到数据，部分浏览器或代理会自动断开连接
+        while task_storage[task_id]["status"] == "processing":
+            yield "data: {}\n\n"
+            await asyncio.sleep(15)
     
     return StreamingResponse(
         generate_stream(),
-        media_type="text/plain",
+        media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Content-Type": "text/event-stream"
         }
     )
 

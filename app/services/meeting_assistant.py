@@ -215,7 +215,7 @@ class MeetingAssistantAgent:
             chat_llm=chat_llm,
             sys_prompt=TEXT_REFINER_PROMPT,
             name="TextRefiner",
-            temperature=0.3,  # 低创造性，高准确性
+            temperature=0.2,  # 低创造性，高准确性
             use_memory=False
         )
         
