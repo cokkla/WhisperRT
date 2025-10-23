@@ -14,7 +14,7 @@ from app.core.logging import logger
 from app.config import HOST, PORT
 
 # 测试时切换到项目根目录，确保静态文件路径正确
-os.chdir(os.path.dirname(os.path.dirname(__file__)))
+# os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
 # 创建FastAPI应用
 app = FastAPI(title="实时语音转写")

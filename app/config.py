@@ -42,6 +42,11 @@ FILE_TRANSCRIPTION_CONFIG = {
     "output_format": "text",  # 可选: "text", "json"
 }
 
+FILE_DOWNLOAD_CONFIG = {
+    "temp_dir": "temp_file",
+    "allowed_output_format": ["markdown", "word"]
+}
+
 # 反幻觉配置 - 速度优化
 # 初始提示词，刚开始中文提示词通用，第二天中文提示词突然会给英文音频造成幻觉，英文提示词又会影响中文音频
 # 目前直接在whisper.py中不传入初始提示词

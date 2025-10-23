@@ -3,6 +3,7 @@
 """
 import asyncio
 import json
+import os.path
 import uuid
 import logging
 from typing import Dict, Any, Optional
@@ -12,6 +13,8 @@ from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from docx import Document
 from docx.shared import Inches
+from app.core.logging import logger
+from app.config import FILE_DOWNLOAD_CONFIG
 from app.services.meeting_assistant import MeetingAssistantAgent
 from app.services.llm import ChatLLM
 from app.models.schemas import MeetingInfo, MeetingMinutesResponse, MeetingMinutesRequest
@@ -184,11 +187,16 @@ async def download_meeting_minutes(task_id: str, format: str = "markdown"):
         raise HTTPException(status_code=400, detail="没有可下载的内容")
     
     content = task_info["result"]
-    
-    if format.lower() == "markdown":
+
+    path_root  = FILE_DOWNLOAD_CONFIG["temp_dir"]
+    if not os.path.exists(path_root):
+        os.makedirs(path_root)
+        logger.info(f"创建文件目录: {path_root}")
+
+    if format.lower() == FILE_DOWNLOAD_CONFIG["allowed_output_format"][0]:
         # 生成Markdown文件
-        filename = f"meeting_minutes_{task_id[:8]}.md"
-        file_path = f"temp_audio/{filename}"
+        filename = f"meeting_minutes_{task_id[:4]}.md"
+        file_path = f"{path_root}/{filename}"
         
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
@@ -199,7 +207,7 @@ async def download_meeting_minutes(task_id: str, format: str = "markdown"):
             media_type="text/markdown"
         )
     
-    elif format.lower() == "word":
+    elif format.lower() == FILE_DOWNLOAD_CONFIG["allowed_output_format"][1]:
         # 生成Word文件
         doc = Document()
 
