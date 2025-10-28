@@ -17,6 +17,7 @@ from app.core.logging import logger
 from app.config import FILE_DOWNLOAD_CONFIG
 from app.services.meeting_assistant import MeetingAssistantAgent
 from app.services.llm import ChatLLM
+from app.services.markdown_to_word import MarkdownToWordConverter
 from app.models.schemas import MeetingInfo, MeetingMinutesResponse, MeetingMinutesRequest
 
 router = APIRouter()
@@ -208,46 +209,33 @@ async def download_meeting_minutes(task_id: str, format: str = "markdown"):
         )
     
     elif format.lower() == FILE_DOWNLOAD_CONFIG["allowed_output_format"][1]:
-        # 生成Word文件
-        doc = Document()
-
-        # 解析Markdown内容并转换为Word格式
-        lines = content.split('\n')
-        current_paragraph = None
-
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-
-            if line.startswith('# '):
-                # 主标题
-                doc.add_heading(line[2:], level=1)
-            elif line.startswith('## '):
-                # 二级标题
-                doc.add_heading(line[3:], level=2)
-            elif line.startswith('### '):
-                # 三级标题
-                doc.add_heading(line[4:], level=3)
-            elif line.startswith('- **') and '**:' in line:
-                # 列表项
-                doc.add_paragraph(line[2:], style='List Bullet')
-            elif line.startswith('- '):
-                # 普通列表项
-                doc.add_paragraph(line[2:], style='List Bullet')
-            else:
-                # 普通段落
-                doc.add_paragraph(line)
-
-        filename = f"meeting_minutes_{task_id[:8]}.docx"
-        file_path = f"temp_audio/{filename}"
-        doc.save(file_path)
-
-        return FileResponse(
-            path=file_path,
-            filename=filename,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        # 生成Word文件 - 使用新的Markdown到Word转换器
+        try:
+            logger.info(f"开始转换Markdown内容到Word格式，任务ID: {task_id}")
+            
+            # 创建转换器
+            converter = MarkdownToWordConverter()
+            
+            # 获取转换统计信息（用于日志）
+            stats = converter.get_conversion_stats(content)
+            logger.info(f"转换统计信息: {stats}")
+            
+            # 转换并保存Word文档
+            filename = f"meeting_minutes_{task_id[:4]}.docx"
+            file_path = f"{path_root}/{filename}"
+            
+            converter.convert_and_save(content, file_path)
+            logger.info(f"Word文档生成完成: {file_path}")
+            
+            return FileResponse(
+                path=file_path,
+                filename=filename,
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+            
+        except Exception as e:
+            logger.error(f"生成Word文档失败: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"生成Word文档失败: {str(e)}")
 
     else:
         raise HTTPException(status_code=400, detail="不支持的格式，请使用markdown或word")

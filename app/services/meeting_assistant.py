@@ -343,14 +343,14 @@ class MeetingAssistantAgent:
         refined_text = await self.refine_text(transcription_text)
         yield {"step": "refining", "status": "completed", "message": "文本润色完成"}
         logging.debug("文本润色完成")
-        logging.debug(refined_text)
+        # logging.debug(refined_text)
 
         # 步骤2：主题识别
         yield {"step": "topic_identification", "status": "processing", "message": "正在识别会议主题..."}
         topic_info = await self.identify_topic(refined_text)
         yield {"step": "topic_identification", "status": "completed", "message": "主题识别完成"}
         logging.debug("主题识别完成")
-        logging.debug(topic_info)
+        # logging.debug(topic_info)
 
         # 步骤3：要点提炼
         yield {"step": "key_points", "status": "processing", "message": "正在提炼讨论要点..."}
@@ -359,21 +359,21 @@ class MeetingAssistantAgent:
         key_points = await self.extract_key_points(refined_text, topics)
         yield {"step": "key_points", "status": "completed", "message": "要点提炼完成"}
         logging.debug("要点提炼完成")
-        logging.debug(key_points)
+        # logging.debug(key_points)
 
         # 步骤4：决策提取
         yield {"step": "decisions", "status": "processing", "message": "正在提取决策事项..."}
         decisions = await self.extract_decisions(refined_text)
         yield {"step": "decisions", "status": "completed", "message": "决策提取完成"}
         logging.debug("决策提取完成")
-        logging.debug(decisions)
+        # logging.debug(decisions)
 
         # 步骤5：行动事项提取
         yield {"step": "action_items", "status": "processing", "message": "正在提取行动事项..."}
         action_items = await self.extract_action_items(refined_text)
         yield {"step": "action_items", "status": "completed", "message": "行动事项提取完成"}
         logging.debug("行动事项提取完成")
-        logging.debug(action_items)
+        # logging.debug(action_items)
 
         # 步骤6：生成会议纪要
         yield {"step": "generating", "status": "processing", "message": "正在生成会议纪要..."}

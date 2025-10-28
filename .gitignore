@@ -176,5 +176,6 @@ cython_debug/
 .cursor/
 models/
 temp_audio/
-example_gen-novel/
+example_gen_novel/
 test/
+temp_file/
